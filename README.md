@@ -2,7 +2,10 @@
 
 LeftRight is a lightning-fast, keyboard-driven image sorting tool built in Rust using the egui framework. It allows you to quickly categorize images into custom folders with smooth animations and an intuitive interface.
 
-![LeftRight Screenshot](screenshot.png)
+
+https://github.com/user-attachments/assets/c4748c61-ed19-4b9c-852c-7fb3954f1cab
+
+
 
 ## Features
 
