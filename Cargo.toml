@@ -1,13 +1,22 @@
 [package]
-name = "image-sorter"
+name = "leftright"
 version = "0.1.0"
 edition = "2021"
+description = "A visual image sorting tool"
+authors = ["Omar Al Matar <bewinxed@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/bewinxed/leftright"
 
 [dependencies]
-eframe = { version = "0.24", features = ["default_fonts"] }
-egui = "0.24"
-image = "0.24"
-winapi = { version = "0.3", features = ["winuser", "windef"] }
+eframe = { version = "0.24.1", features = ["default"] }
+image = "0.24.7"
 tokio = { version = "1.0", features = ["full"] }
-futures = "0.3"
+clap = { version = "4.4", features = ["derive"] }
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["winuser", "windef"] }
+
+[[bin]]
+name = "leftright"
+path = "src/main.rs"

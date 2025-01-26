@@ -1,6 +1,7 @@
+use clap::Parser;
 use eframe::egui;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::time::Instant;
@@ -70,6 +71,14 @@ impl ImageLoader {
     }
 }
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Directory containing images to sort
+    #[arg(short, long)]
+    dir: Option<PathBuf>,
+}
+
 #[derive(Clone)]
 struct Animation {
     path: PathBuf,
@@ -95,6 +104,8 @@ struct CategoryBucket {
 }
 
 struct ImageSorter {
+    base_dir: PathBuf,
+
     images: Vec<PathBuf>,
     categories: Vec<String>,
     category_buckets: HashMap<String, CategoryBucket>,
@@ -122,9 +133,11 @@ struct PendingMove {
 }
 
 impl ImageSorter {
-    fn new() -> Self {
+    fn new(base_dir: PathBuf) -> Self {
         let (texture_tx, texture_rx) = channel();
         Self {
+            base_dir,
+
             images: Vec::new(),
             categories: Vec::new(),
             category_buckets: HashMap::new(),
@@ -267,14 +280,15 @@ impl ImageSorter {
 
     fn setup_categories(&mut self, ctx: &egui::Context) {
         for category in &self.categories {
-            std::fs::create_dir_all(category).unwrap();
+            let category_path = self.base_dir.join(category);
+            std::fs::create_dir_all(&category_path).unwrap();
             self.category_buckets.insert(
                 category.clone(),
                 CategoryBucket {
                     files: Vec::new(),
                     rect: egui::Rect::NOTHING,
                     stack_offset: 3.0,
-                    next_stack_position: 0.0, // Initialize at 0
+                    next_stack_position: 0.0,
                 },
             );
         }
@@ -283,7 +297,7 @@ impl ImageSorter {
     }
 
     fn refresh_images(&mut self, ctx: &egui::Context) {
-        self.images = std::fs::read_dir(".")
+        self.images = std::fs::read_dir(&self.base_dir)
             .unwrap()
             .filter_map(Result::ok)
             .filter(|entry| {
@@ -300,7 +314,11 @@ impl ImageSorter {
             .map(|entry| entry.path())
             .collect();
 
-        println!("Found {} images", self.images.len());
+        println!(
+            "Found {} images in {}",
+            self.images.len(),
+            self.base_dir.display()
+        );
 
         if !self.images.is_empty() {
             self.current_image = Some(0);
@@ -513,7 +531,7 @@ impl ImageSorter {
 
             let from = self.images[current_idx].clone();
             let category = &self.categories[direction].clone();
-            let to = Path::new(category).join(from.file_name().unwrap());
+            let to = self.base_dir.join(category).join(from.file_name().unwrap());
 
             // Create animation BEFORE moving the file
             if let Some(bucket) = self.category_buckets.get_mut(category) {
@@ -760,6 +778,34 @@ impl eframe::App for ImageSorter {
 }
 
 fn main() -> eframe::Result<()> {
+    let args = Args::parse();
+
+    // Get the directory to sort
+    let dir = args.dir.unwrap_or_else(|| {
+        let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        println!(
+            "No directory specified, using current directory: {}",
+            current_dir.display()
+        );
+        current_dir
+    });
+
+    // Ensure directory exists
+    if !dir.exists() {
+        eprintln!("Error: Directory '{}' does not exist", dir.display());
+        std::process::exit(1);
+    }
+
+    // Change to the directory
+    if let Err(e) = std::env::set_current_dir(&dir) {
+        eprintln!(
+            "Error: Could not change to directory '{}': {}",
+            dir.display(),
+            e
+        );
+        std::process::exit(1);
+    }
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([800.0, 600.0])
@@ -770,8 +816,8 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "Image Sorter",
+        &format!("LeftRight - {}", dir.display()),
         options,
-        Box::new(|_cc| Box::new(ImageSorter::new())),
+        Box::new(|_cc| Box::new(ImageSorter::new(dir))),
     )
 }

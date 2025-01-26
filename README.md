@@ -2,58 +2,54 @@
 
 LeftRight is a lightning-fast, keyboard-driven image sorting tool built in Rust using the egui framework. It allows you to quickly categorize images into custom folders with smooth animations and an intuitive interface.
 
-
 https://github.com/user-attachments/assets/c4748c61-ed19-4b9c-852c-7fb3954f1cab
-
-
 
 ## Features
 
-- **Fast Concurrent Image Loading**: Loads multiple images simultaneously for quick startup
-- **Custom Categories**: Define 1-4 categories for sorting your images
-- **Keyboard Shortcuts**: Quick sorting using arrow keys
-- **Smooth Animations**: Visual feedback with animated transitions
-- **Progress Tracking**: Real-time progress indication during image loading
-- **Undo Support**: Easily undo sorting mistakes with Ctrl+Z
-
-## Usage
-
-1. Run the application in a directory containing images
-2. Enter your category names (1-4), separated by commas (e.g., "good,bad" or "keep,maybe,delete")
-3. Use arrow keys to sort images:
-   - ← Left Arrow: First category
-   - → Right Arrow: Second category
-   - ↑ Up Arrow: Third category
-   - ↓ Down Arrow: Fourth category
-   - Ctrl+Z: Undo last move
+- Quick image sorting with keyboard shortcuts
+- Visual feedback with smooth animations
+- Concurrent image loading for fast startup
+- Support for multiple image formats (JPG, PNG, GIF, WebP)
+- Undo functionality
+- Real-time progress tracking
 
 ## Installation
 
-### Prerequisites
-- Rust 1.75 or higher
-- Cargo package manager
-
-### Building from source
 ```bash
-git clone https://github.com/yourusername/leftright.git
+cargo install leftright
+```
+
+## Usage
+
+```bash
+# Sort images in current directory
+leftright
+
+# Sort images in specific directory
+leftright -d /path/to/images
+
+# Get help
+leftright --help
+```
+
+## Keyboard Shortcuts
+
+- `←` - Move image to left category
+- `→` - Move image to right category
+- `↑` - Move image to up category
+- `↓` - Move image to down category
+- `Ctrl+Z` - Undo last move
+
+## Building from Source
+
+```bash
+git clone https://github.com/yourusername/leftright
 cd leftright
 cargo build --release
 ```
 
-The executable will be available in `target/release/`
-
-## Technical Details
-
-- Built with Rust and egui for the UI
-- Uses tokio for async image loading
-- Supports common image formats (JPG, PNG, GIF, WebP)
-- Multi-threaded image processing
-- Efficient memory management
+The binary will be available in `target/release/leftright`
 
 ## License
 
-MIT License - See LICENSE file for details
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+MIT
